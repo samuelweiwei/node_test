@@ -7,9 +7,10 @@ import Blog from './pages/routers/Blog';
 import About from './pages/routers/About';
 import NoPage from './pages/routers/NoPage';
 import Layout from './pages/routers/Layout';
+import loadedGraph from './graph/loadGraph';
 
 function App() {
-  console.log("Into react app")
+  console.log("Distance is: "+loadedGraph.CalculateAvailability('A'));
   return (
     <CustomProvider theme="light">
     <Container className="app">

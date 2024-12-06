@@ -10,11 +10,3 @@ app.use(express.static('build'));
 dotenv.config();
 const auth = jwt;
 
-let port = process.env.port || constant.SERV_PORT;
-app.get('*', (req, rsp)=>{
-    rsp.sendFile(path.resolve(__dirname, '../../build/index.html'));
-})
-app.listen(port, ()=>{
-    console.log(`Server is up and running on ${port}`);
-})
-
