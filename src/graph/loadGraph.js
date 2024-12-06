@@ -1,4 +1,4 @@
-const WeightedDirectedGraph = require("./weightedDirectedGraph");
+import WeightedDirectedGraph from "./weightedDirectedGraph";
 
 const loadedGraph = new WeightedDirectedGraph();
 //load nodes
@@ -19,4 +19,4 @@ loadedGraph.addEdge('C','E', 2);
 loadedGraph.addEdge('A','E', 7);
 loadedGraph.addEdge('B','C', 4);
 
-module.exports = loadedGraph;
+export default loadedGraph;
