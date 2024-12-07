@@ -1,27 +1,26 @@
 import logo from './logo.svg';
-import {Button, CustomProvider, Container} from 'rsuite';
-import 'rsuite/dist/rsuite.min.css'
 import './App.css';
-import loadedGraph from './graph/loadGraph';
+import loadedGraph from './backend/graph/loadGraph';
 
 function App() {
-  // console.log("Distance is:"+loadedGraph.CalculatePathDistance('A','B','C'));
-  console.log(loadedGraph.shortestPathDijkstra('A','C'));
+  console.dir(loadedGraph.findRouteWithMaxDistances('C', 'C', 30));
   return (
-    <CustomProvider theme="light">
-    <Container className="app">
-      <header className="app-header">
+    <div className="App">
+      <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
-
-        <Button href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Learn React
-        </Button>
+        </a>
       </header>
-    </Container>
-  </CustomProvider>
+    </div>
   );
 }
 
