@@ -1,147 +1,53 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const constant = require("./src/backend/global/globalConf")
-const path = require("path")
-const app = express();
-const loadedGraph = require("./src/backend/graph/loadGraph");
+const express = require('express');
+var https = require('https')
+var http = require('http')
+const dotenv = require('dotenv');
+const path = require('path');
+const authJWT = require('./backend/middleware/authJWT');
+const graphCtrl = require('./backend/controller/graphCtrl');
+const jwtCtrl = require('./backend/controller/authJWTCtrl')
+const commonCtrl = require('./backend/controller/commonCtrl');
+const logger = require('./backend/global/logger')
+var fs = require('fs');
 
+//Initialization
+const app = express();
 dotenv.config();
 //server starter
-let port = process.env.port || constant.SERV_PORT;
-app.listen(port, ()=>{
-    console.log(`Server is up and running on ${port}`);
-})
-//router starter
+const httpPort = process.env.HTTPS_PORT || 5000;
+const httpsPort = process.env.HTTPS_PORT || 5443;
+const httpEnabled = process.env.HTTP_ENABLED || 'disabled';
+var options = {
+    key: fs.readFileSync('./rootCA.key'),
+    cert: fs.readFileSync('./rootCA.pem')
+  };
+// app.listen(port, ()=>{
+//     console.log(`Server is up and running on ${port}`);
+//     logger.info(`Starting server........`);
+// })
+if (httpEnabled.toLowerCase() === 'enabled') {
+    console.log('Http server started............');
+    http.createServer(app).listen(httpPort);
+}
+console.log('Https server started........');
+https.createServer(options, app).listen(httpsPort);
+//router starter, integrate react, not separate controller
 app.use(express.static('build'));
-
 app.get('/', (req, rsp, next)=>{
     rsp.sendFile(path.resolve(__dirname, './build/index.html'));
 })
 
-app.get('/routeswithmaxstops', (req, res, next)=>{
-    const src = req.query.src;
-    const dest = req.query.dest;
-    const stopsStr = req.query.stops;
-    if (!src) {
-        console.warn(`No source start place: ${src}`);
-        res.status(400).send({result: 'failed', errors:`No source start place: ${src}`});
-        return;
-    }
-    if (!dest) {
-        console.warn(`No destination place: ${dest}`);
-        res.status(400).send({result: 'failed', errors:`No destination place: ${dest}`});
-        return;
-    }
-    if (!stopsStr) {
-        console.warn(`No stops number: ${stopsStr}`);
-        res.status(400).send({result: 'failed', errors:`No stops number: ${stopsStr}`});
-        return;
-    }
-    if (isNaN(stopsStr.trim())){
-        console.warn(`Stops number is not number: ${stopsStr}`);
-        res.status(400).send({result: 'failed', errors:`Stops number is not number: ${stopsStr}`});
-        return;
-    }
-    const stops = parseInt(stopsStr.trim());
-    const routes = loadedGraph.findRoutesWithMaxStops(src, dest, stops);
-    res.status(200).send({result: 'succeeded', msg: routes});
-    // console.dir(routes);
-})
-const awtmiddleware = (req, res, next)=>{
-    console.log("jwt middle ware");
-    next();
-}
-app.get('/routeswithexactstops', awtmiddleware, (req, res)=>{
-    const src = req.query.src;
-    const dest = req.query.dest;
-    const stopsStr = req.query.stops;
-    if (!src) {
-        console.warn(`No source start place: ${src}`);
-        res.status(400).send({result: 'failed', errors:`No source start place: ${src}`});
-        return;
-    }
-    if (!dest) {
-        console.warn(`No destination place: ${dest}`);
-        res.status(400).send({result: 'failed', errors:`No destination place: ${dest}`});
-        return;
-    }
-    if (!stopsStr) {
-        console.warn(`No stops number: ${stopsStr}`);
-        res.status(400).send({result: 'failed', errors:`No stops number: ${stopsStr}`});
-        return;
-    }
-    if (isNaN(stopsStr.trim())){
-        console.warn(`Stops number is not number: ${stopsStr}`);
-        res.status(400).send({result: 'failed', errors:`Stops number is not number: ${stopsStr}`});
-        return;
-    }
-    const stops = parseInt(stopsStr.trim());
-    const routes = loadedGraph.findRoutesWithExactStops(src, dest, stops);
-    // console.dir(routes);
-    res.status(200).send({result: 'succeeded', msg: routes});
-})
+//seperate controllers
+app.get('/routeswithmaxstops', authJWT.verifyToken, graphCtrl.routesWithMaxStops);
 
-app.get("/routeswithmaxdist", (req, res, next)=>{
-    const src = req.query.src;
-    const dest = req.query.dest;
-    const distStr = req.query.dist;
-    if (!src) {
-        console.warn(`No source start place: ${src}`);
-        res.status(400).send({result: 'failed', errors:`No source start place: ${src}`});
-        return;
-    }
-    if (!dest) {
-        console.warn(`No destination place: ${dest}`);
-        res.status(400).send({result: 'failed', errors:`No destination place: ${dest}`});
-        return;
-    }
-    if (!distStr) {
-        console.warn(`No distance number: ${distStr}`);
-        res.status(400).send({result: 'failed', errors:`No distance number: ${distStr}`});
-        return;
-    }
-    if (isNaN(distStr.trim())){
-        console.warn(`Distance number is not number: ${distStr}`);
-        res.status(400).send({result: 'failed', errors:`Distance number is not number: ${distStr}`});
-        return;
-    }
-    const dist = parseInt(distStr.trim());
-    const routes = loadedGraph.findRouteWithMaxDistances(src, dest, dist);
-    res.status(200).send({result: 'succeeded', msg: routes});
-})
+app.get('/routeswithfixedstops', authJWT.verifyToken, graphCtrl.routesWithFixedStops);
 
-app.get('/shortestpath', (req, res, next)=>{
-    const src = req.query.src;
-    const dest = req.query.dest;
-    if (!src) {
-        console.warn(`No source start place: ${src}`);
-        res.status(400).send({result: 'failed', errors:`No source start place: ${src}`});
-        return;
-    }
-    if (!dest) {
-        console.warn(`No destination place: ${dest}`);
-        res.status(400).send({result: 'failed', errors:`No destination place: ${dest}`});
-        return;
-    }
-    const routes = loadedGraph.shortestPathDijkstra(src, dest);
-    res.status(200).send({result: 'succeeded', msg: routes});
-    // console.dir(routes);
-})
+app.get('/routeswithmaxdist', authJWT.verifyToken, graphCtrl.routesWithMaxDist);
 
+app.get('/shortestpath', authJWT.verifyToken, graphCtrl.shortestPath);
 
-app.post("/distances", (req, res, next)=>{
-    const paths = req.body
-    console.log(paths);
-    const distance = loadedGraph.calculatePathDistance(paths);
-    res.status(200).send({result: 'succeeded', msg: {distance: distance}});
-})
+app.post('/distances', authJWT.verifyToken, graphCtrl.distances);
 
+app.get('/generateToken', authJWT.generateToken, jwtCtrl.generateToken);
 
-app.use((req, res, next) => {
-    console.log('Page not found on server')
-}, (req,res, next)=>{
-    const msg = 'Page Not Found';
-    msg.status = 404;
-    next(msg);
-});
-
+app.use(commonCtrl.pageNotFound);

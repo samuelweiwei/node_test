@@ -1,6 +1,7 @@
 const {
   MinPriorityQueue
 } = require("@datastructures-js/priority-queue");
+const logger = require('../global/logger');
 
 //Weighted directed graph class
 class WeightedDirectedGraph {
@@ -16,7 +17,7 @@ class WeightedDirectedGraph {
   //Single direction edge
   addEdge(src, dest, weight) {
     if (!src || !dest) {
-      console.error(
+      logger.error(
         `src is not available with value of [${src}], or dest is not available with value of [${dest}]`
       );
     }
@@ -32,7 +33,7 @@ class WeightedDirectedGraph {
   //single direction remove
   removeEdge(src, dest) {
     if (!src || !dest) {
-      console.error(
+      logger.error(
         `src is not available with value of [${src}], or dest is not available with value of [${dest}]`
       );
     }
@@ -42,7 +43,7 @@ class WeightedDirectedGraph {
         this.adjList.get(src).filter((item) => item.node !== dest)
       );
     } else {
-      console.warerrorn(`${src} does not exist as a src`);
+      logger.warerrorn(`${src} does not exist as a src`);
     }
   }
   // Remove a node and all its outgoing and incoming edges
@@ -63,7 +64,7 @@ class WeightedDirectedGraph {
   //Get the outgoing neighbours of a node
   getNeighbours(node) {
     if (!node) {
-      console.error(`Empty node argument: ${node}`);
+      logger.error(`Empty node argument: ${node}`);
       return;
     }
     return this.adjList.has(node) ? this.adjList.get(node) : [];
@@ -71,21 +72,21 @@ class WeightedDirectedGraph {
 
   //Display the graph
   display() {
-    console.log(`adjList length is ${this.adjList.size}`);
+    logger.info(`adjList length is ${this.adjList.size}`);
     for (let [node, edges] of this.adjList) {
       const edgeList = edges
         .map((edge) => `${edge.node} (distance: ${edge.distance})`)
         .join(", ");
-      console.log(`${node}: ${edgeList}`);
+      logger.log(`${node}: ${edgeList}`);
     }
   }
 
   //Calculat the path distance
   calculatePathDistance(...node) {
     let distanceTtl = 0;
-    console.dir(node);
+    logger.info(node);
     if (!node || node.length === 1) {
-      console.error("Cannot calculate the path on unll node or only 1 node");
+      logger.error("Cannot calculate the path on unll node or only 1 node");
       return distanceTtl;
     }
     for (let i = 0; i < node.length - 1; i++) {
@@ -93,14 +94,14 @@ class WeightedDirectedGraph {
         const src = this.adjList.get(node[i]);
         const dest = src.filter((item) => item.node === node[i + 1]);
         if (!dest) {
-          console.error(
+          logger.error(
             `No such route, break between ${node[i]} and ${node(i + 1)}`
           );
           return 0;
         }
         distanceTtl += dest[0].distance;
       } else {
-        console.error(`${node[i]} or ${node[i + 1]} does not exists. `);
+        logger.error(`${node[i]} or ${node[i + 1]} does not exists. `);
         return distanceTtl;
       }
     }
@@ -112,7 +113,7 @@ class WeightedDirectedGraph {
   //Input src and dest node, return the path and distance. If anomaly or no route exists, -1 will be output.
   shortestPathDijkstra(src, dest) {
     if (!this.adjList.has(src) || !this.adjList.has(dest)) {
-      console.error(
+      logger.error(
         `One or both nodes do not exist: src=${src}, dest=${dest}`
       );
       return { path: null, distance: 0 };;
@@ -165,13 +166,13 @@ class WeightedDirectedGraph {
   //return array of all path available
   findRoutesWithMaxStops(src, dest, max, currentPath =[], currentStops = 0){   
     if (!this.adjList.has(src) || !this.adjList.has(dest)) {
-      console.error(
+      logger.error(
         `One or both nodes do not exist: src=${src}, dest=${dest}`
       );
       return [];
     }
     if (isNaN(max)){
-      console.error(`Illegal input stops number is:${max}, and its type is ${typeof(max)}`);
+      logger.error(`Illegal input stops number is:${max}, and its type is ${typeof(max)}`);
       return [];
     }
     currentPath.push(src);
@@ -184,7 +185,7 @@ class WeightedDirectedGraph {
     if (src === dest && currentPath.length > 1){
       routes.push([...currentPath]);
     }
-    // console.log(`src is ${src}, dest is ${dest}, max is ${max}, currentpath is ${currentPath}, routes is ${routes}`);
+    // logger.log(`src is ${src}, dest is ${dest}, max is ${max}, currentpath is ${currentPath}, routes is ${routes}`);
     for(const neighbour of this.getNeighbours(src)){
       routes.push(...this.findRoutesWithMaxStops(neighbour.node, dest, max, currentPath,currentStops+1))
     }
@@ -198,13 +199,13 @@ class WeightedDirectedGraph {
   findRouteWithMaxDistances(src, dest, maxDist, currentPath=[], currentDist=0){
     //Argument check
     if (!this.adjList.has(src) || !this.adjList.has(dest)) {
-      console.error(
+      logger.error(
         `One or both nodes do not exist: src=${src}, dest=${dest}`
       );
       return [];
     }
     if (isNaN(maxDist)){
-      console.error(`Illegal input stops number is:${maxDist}, and its type is ${typeof(maxDist)}`);
+      logger.error(`Illegal input stops number is:${maxDist}, and its type is ${typeof(maxDist)}`);
       return [];
     }
 
@@ -230,13 +231,13 @@ class WeightedDirectedGraph {
 
   findRoutesWithExactStops(src, dest, stops, currentPath=[], currentStops=0){
     if (!this.adjList.has(src) || !this.adjList.has(dest)) {
-      console.error(
+      logger.error(
         `One or both nodes do not exist: src=${src}, dest=${dest}`
       );
       return [];
     }
     if (isNaN(stops)){
-      console.error(`Illegal input stops number is:${stops}, and its type is ${typeof(stops)}`);
+      logger.error(`Illegal input stops number is:${stops}, and its type is ${typeof(stops)}`);
       return [];
     }
     currentPath.push(src);
@@ -249,7 +250,7 @@ class WeightedDirectedGraph {
     if (src === dest && currentPath.length === (stops+1)){
       routes.push([...currentPath]);
     }
-    // console.log(`src is ${src}, dest is ${dest}, max is ${max}, currentpath is ${currentPath}, routes is ${routes}`);
+    // logger.log(`src is ${src}, dest is ${dest}, max is ${max}, currentpath is ${currentPath}, routes is ${routes}`);
     for(const neighbour of this.getNeighbours(src)){
       routes.push(...this.findRoutesWithExactStops(neighbour.node, dest, stops, currentPath,currentStops+1))
     }

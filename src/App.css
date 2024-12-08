@@ -9,7 +9,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    animation: App-logo-spin infinite 40s linear;
   }
 }
 
@@ -35,4 +35,20 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.Parent-div {
+  border: 1px transparent;
+  margin: 1rem;
+  padding: 2em 2em;
+  text-align: left;
+  height: 5%;
+}
+
+.Child-div {
+  display: inline-flex;
+  border: 1px transparent;
+  padding: 1em 1em;
+  vertical-align: bottom;
+  text-align: left;
 }

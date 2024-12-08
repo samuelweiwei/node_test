@@ -11,6 +11,11 @@
 # production
 /build
 
+# environment
+.env
+.key
+.pem
+
 # misc
 .DS_Store
 .env.local
